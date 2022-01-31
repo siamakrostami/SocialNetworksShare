@@ -18,6 +18,9 @@ protocol FacebookProtocols{
 class Facebook : FacebookProtocols{
     
     private var videoData : Data!
+    var videoContent = ShareVideoContent()
+    var videoObject : ShareVideo!
+    var shareDialog : ShareDialog!
     init(){}
     
     func shareVideoToFacebook(url: URL, controller : UIViewController? ,type: ShareTargets, completion: @escaping ShareErrorCompletion) {
@@ -29,17 +32,17 @@ class Facebook : FacebookProtocols{
             }catch{
                 debugPrint(error)
             }
-            let videoObject = ShareVideo(data: self.videoData)
-            let videoContent = ShareVideoContent()
-            videoContent.video = videoObject
-            let shareDialog = ShareDialog.init(viewController: controller.self, content: videoContent, delegate: nil)
+             videoObject = ShareVideo(data: self.videoData)
+             videoContent = ShareVideoContent()
+             videoContent.video = videoObject
+             shareDialog = ShareDialog(viewController: controller, content: videoContent, delegate: controller as? SharingDelegate)
             shareDialog.show()
-//            if shareDialog.canShow{
-//                shareDialog.show()
-//                completion(nil)
-//            }else{
-//                completion(ShareError.cantOpenUrl)
-//            }
+            if shareDialog.canShow{
+                shareDialog.show()
+                completion(nil)
+            }else{
+                completion(ShareError.cantOpenUrl)
+            }
         case .facebookMessenger:
             
             let content = ShareLinkContent()
