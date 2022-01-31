@@ -32,18 +32,14 @@ class Facebook : FacebookProtocols{
             let videoObject = ShareVideo(data: self.videoData)
             let videoContent = ShareVideoContent()
             videoContent.video = videoObject
-            let shareDialog = ShareDialog.init(viewController: controller, content: videoContent, delegate: controller as? SharingDelegate)
-            do{
-                try shareDialog.validate()
-            }catch{
-                completion(ShareError.cantOpenUrl)
-            }
-            if shareDialog.canShow{
-                shareDialog.show()
-                completion(nil)
-            }else{
-                completion(ShareError.cantOpenUrl)
-            }
+            let shareDialog = ShareDialog.init(viewController: controller.self, content: videoContent, delegate: nil)
+            shareDialog.show()
+//            if shareDialog.canShow{
+//                shareDialog.show()
+//                completion(nil)
+//            }else{
+//                completion(ShareError.cantOpenUrl)
+//            }
         case .facebookMessenger:
             
             let content = ShareLinkContent()
