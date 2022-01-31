@@ -1,11 +1,11 @@
 
-# SRShare
+# SocialNetworksShare
 Custom Share Library
 
 
 ## Installation
 
-Install SRShare with SPM
+Install SocialNetworksShare with SPM
 
     
 ## Info.Plist
@@ -114,7 +114,7 @@ Security.framework
 ## Usage/Examples
 
 ```swift
-import SRShare
+import SocialNetworksShare
 import MessageUI
 import FacebookShare
 
