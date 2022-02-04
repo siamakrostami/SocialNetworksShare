@@ -43,6 +43,16 @@ extension ShareTargets{
             return URL(string: "tiktok://")
         case .snapchat:
             return URL(string: "snapchat://")
+        case .facebook:
+            return URL(string: "fb://")
+        case .facebookMessenger:
+            return URL(string: "fb-messenger://")
+        case .twitterPost:
+            return URL(string: "twitter://")
+        case .telegram:
+            return URL(string: "tg://")
+        case .whatsapp:
+            return URL(string: "whatsapp://")
         default:
             return nil
         }
