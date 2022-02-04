@@ -40,13 +40,13 @@ extension ShareTargets{
         case .instagramStory:
             return URL(string: "instagram://")
         case .tiktok:
-            return URL(string: "tiktok://") ?? URL(string: "snssdk1233://") ?? URL(string: "snssdk1180://") ?? URL(string: "tiktoksharesdk://") ?? URL(string: "tiktokopensdk://")
+            return URL(string: "snssdk1233://") 
         case .snapchat:
             return URL(string: "snapchat://")
         case .facebook:
             return URL(string: "fb://")
         case .facebookMessenger:
-            return URL(string: "fb-messenger://")
+            return URL(string: "fb-messenger-share://")
         case .twitterPost:
             return URL(string: "twitter://")
         case .telegram:
