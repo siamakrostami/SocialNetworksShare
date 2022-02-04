@@ -32,6 +32,7 @@ open class ShareHandler{
     open var appSectionDataSource = CurrentValueSubject<[ShareTargets]?,Never>(nil)
     open var ownerSubSectionDataSource = CurrentValueSubject<[ShareTargets]?,Never>(nil)
     open var normalSubSectionDataSource = CurrentValueSubject<[ShareTargets]?,Never>(nil)
+    open var cancellableSet : Set<AnyCancellable> = []
     open weak var subActionsDelegate : ShareSubActionProtocols?
     
     
