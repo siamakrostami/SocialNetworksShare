@@ -15,6 +15,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
          .package(url: "https://github.com/facebook/facebook-ios-sdk", from: "12.3.1"),
+         .package(name: "Watermark", url: "https://git.sishemi.com/ios-libs/Watermark.git", branch: "master"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -24,6 +25,7 @@ let package = Package(
             dependencies: [.product(name: "FacebookLogin", package: "facebook-ios-sdk"),
                            .product(name: "FacebookShare", package: "facebook-ios-sdk"),
                            .product(name: "FacebookCore", package: "facebook-ios-sdk"),
+                           .product(name: "Watermark", package: "Watermark"),
                           "TikTokOpenSDK","SCSDKCoreKit","SCSDKCreativeKit"]),
         .binaryTarget(name: "SCSDKCoreKit", path: "Sources/Frameworks/SCSDKCoreKit.xcframework"),
         .binaryTarget(name: "SCSDKCreativeKit", path: "Sources/Frameworks/SCSDKCreativeKit.xcframework"),

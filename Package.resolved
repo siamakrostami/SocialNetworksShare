@@ -2,12 +2,30 @@
   "object": {
     "pins": [
       {
+        "package": "Alamofire",
+        "repositoryURL": "https://github.com/Alamofire/Alamofire",
+        "state": {
+          "branch": null,
+          "revision": "f82c23a8a7ef8dc1a49a8bfc6a96883e79121864",
+          "version": "5.5.0"
+        }
+      },
+      {
         "package": "Facebook",
         "repositoryURL": "https://github.com/facebook/facebook-ios-sdk",
         "state": {
           "branch": null,
           "revision": "0470d1319adb3eb1d29cb489b93574d799fcc0eb",
           "version": "12.3.1"
+        }
+      },
+      {
+        "package": "Watermark",
+        "repositoryURL": "https://git.sishemi.com/ios-libs/Watermark.git",
+        "state": {
+          "branch": "master",
+          "revision": "85140d1e8d4e0a5689eccf21139df985ad77e82d",
+          "version": null
         }
       }
     ]

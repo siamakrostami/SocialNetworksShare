@@ -33,6 +33,21 @@ public enum ShareTargets : CaseIterable{
 
 extension ShareTargets{
     
+    public var appSchemes : URL?{
+        switch self{
+        case .instagramPost:
+            return URL(string: "instagram://")
+        case .instagramStory:
+            return URL(string: "instagram://")
+        case .tiktok:
+            return URL(string: "tiktok://")
+        case .snapchat:
+            return URL(string: "snapchat://")
+        default:
+            return nil
+        }
+    }
+    
     public var shareAppName : String{
         switch self{
         case .instagramPost:

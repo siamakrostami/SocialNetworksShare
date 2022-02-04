@@ -7,11 +7,13 @@
 
 import Foundation
 import UIKit
+import Combine
+import Watermark
 
 public typealias ShareErrorCompletion = ((ShareError?) -> Void)
 
 public protocol ShareHandlerProtocols{
-    func shareVideo(to target : ShareTargets , completion:@escaping ShareErrorCompletion)
+    func shareVideo(to target : ShareTargets ,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion ,shareErrorCompletion: @escaping ShareErrorCompletion)
 }
 
 public protocol ShareSubActionProtocols : AnyObject{
@@ -27,128 +29,99 @@ open class ShareHandler{
     
     private var shareObject : ShareObject?
     
-    open var appSectionDataSource = Utility.appListSection
-    open var ownerSubSectionDataSource = Utility.ownerSubActionsSection
-    open var normalSubSectionDataSource = Utility.normalSubActionsSection
-    
+    open var appSectionDataSource = CurrentValueSubject<[ShareTargets]?,Never>(nil)
+    open var ownerSubSectionDataSource = CurrentValueSubject<[ShareTargets]?,Never>(nil)
+    open var normalSubSectionDataSource = CurrentValueSubject<[ShareTargets]?,Never>(nil)
     open weak var subActionsDelegate : ShareSubActionProtocols?
     
     
     public init(ShareObject : ShareObject){
         self.shareObject = ShareObject
+        self.bindWatermarkURL()
     }
 }
 
 extension ShareHandler : ShareHandlerProtocols{
     
-    public func shareVideo(to target: ShareTargets, completion: @escaping ShareErrorCompletion) {
+    public func shareVideo(to target: ShareTargets,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion ,shareErrorCompletion: @escaping ShareErrorCompletion) {
         guard let share = shareObject else {return}
         switch target{
-        case .instagramPost , .instagramStory:
-            Instagram().shareVideoToInstagram(url: share.watermarkedVideoToShare, type: target) { [weak self] error in
-                guard let _ = self else {return}
-                guard error == nil else {
-                    completion(error)
-                    return
-                }
-                completion(nil)
-            }
+        case .instagramPost , .instagramStory , .snapchat:
+            Utility.watermarkProcess(shareObject: share, shareTarget: target, imageDownloadProgress: imageDownloadProgress, videoDownloadProgress: videoDownloadProgress, watermarkProgress: watermarkProgress, exportCompletion: exportCompletion, cachedWatermark: cachedWatermark, downloadError: downloadError, shareErrorCompletion: shareErrorCompletion)
         case .whatsapp:
             Whatsapp().sendPostToWhatsapp(url: share.postUrlToShare) { [weak self] error in
                 guard let _ = self else {return}
                 guard error == nil else {
-                    completion(error)
+                    shareErrorCompletion(error)
                     return
                 }
-                completion(nil)
+                shareErrorCompletion(nil)
             }
         case .imessage:
-            iMessage().sendVideoToiMessage(url: share.watermarkedVideoToShare, viewController: share.rootViewController) { [weak self] error in
+            iMessage().sendURLToiMessage(shareObject: share) { [weak self] error in
                 guard let _ = self else {return}
                 guard error == nil else {
-                    completion(error)
+                    shareErrorCompletion(error)
                     return
                 }
-                completion(nil)
+                shareErrorCompletion(nil)
             }
-        case .facebook:
-            Facebook().shareVideoToFacebook(url: share.watermarkedVideoToShare, controller: share.rootViewController, type: target) { [weak self] error in
+        case .facebook , .facebookMessenger:
+            Facebook().shareURLToFacebook(shareObject: share, type: target) {  [weak self] error in
                 guard let _ = self else {return}
                 guard error == nil else {
-                    completion(error)
+                    shareErrorCompletion(error)
                     return
                 }
-                completion(nil)
+                shareErrorCompletion(nil)
             }
             
         case .twitterPost:
             Twitter().sendPostToTwitter(url: share.postUrlToShare) { [weak self] error in
                 guard let _ = self else {return}
                 guard error == nil else {
-                    completion(error)
+                    shareErrorCompletion(error)
                     return
                 }
-                completion(nil)
+                shareErrorCompletion(nil)
             }
         case .tiktok:
 #if !targetEnvironment(simulator)
-            TikTok().sendVideoToTikTok(url: share.watermarkedVideoToShare) { [weak self] error in
-                guard let _ = self else {return}
-                guard error == nil else {
-                    completion(error)
-                    return
-                }
-                completion(nil)
-            }
+            Utility.watermarkProcess(shareObject: share, shareTarget: target, imageDownloadProgress: imageDownloadProgress, videoDownloadProgress: videoDownloadProgress, watermarkProgress: watermarkProgress, exportCompletion: exportCompletion, cachedWatermark: cachedWatermark, downloadError: downloadError, shareErrorCompletion: shareErrorCompletion)
 #else
-            completion(ShareError.appNotFound)
+            shareErrorCompletion(ShareError.appNotFound)
 #endif
-        case .snapchat:
-            Snapchat().shareVideoToSnapchat(url: share.watermarkedVideoToShare, view: share.rootViewController.view) { [weak self] error in
-                guard let _ = self else {return}
-                guard error == nil else {
-                    completion(error)
-                    return
-                }
-                completion(nil)
-            }
         case .telegram:
             Telegram().shareLinkToTelegram(url: share.postUrlToShare) { [weak self] error in
                 guard let _ = self else {return}
                 guard error == nil else {
-                    completion(error)
+                    shareErrorCompletion(error)
                     return
                 }
-                completion(nil)
+                shareErrorCompletion(nil)
             }
         case .cameraRoll:
-            self.saveVideoToCameraRoll { [weak self] error in
-                guard let _ = self else {return}
-                guard error == nil else {
-                    completion(error)
-                    return
-                }
-                completion(nil)
-            }
+            Utility.watermarkProcess(shareObject: share, shareTarget: target, imageDownloadProgress: imageDownloadProgress, videoDownloadProgress: videoDownloadProgress, watermarkProgress: watermarkProgress, exportCompletion: exportCompletion, cachedWatermark: cachedWatermark, downloadError: downloadError, shareErrorCompletion: shareErrorCompletion)
+            self.subActionsDelegate?.saveToCamera()
             //TODO: - Create Logic
         case .copyLink:
             self.copyLink { [weak self] error in
                 guard let _ = self else {return}
                 guard error == nil else {
-                    completion(error)
+                    shareErrorCompletion(error)
                     return
                 }
-                completion(nil)
+                shareErrorCompletion(nil)
             }
             break
         case .sendMail:
             Mail().sendMail(url: share.postUrlToShare, viewController: share.rootViewController) { [weak self] error in
                 guard let _ = self else {return}
                 guard error == nil else {
-                    completion(error)
+                    shareErrorCompletion(error)
                     return
                 }
-                completion(nil)
+                shareErrorCompletion(nil)
             }
             break
         case .report:
@@ -163,19 +136,9 @@ extension ShareHandler : ShareHandlerProtocols{
         case .deleteVideo:
             self.subActionsDelegate?.deleteVideo()
             break
-        case .facebookMessenger:
-            Facebook().shareVideoToFacebook(url: share.postUrlToShare, controller: share.rootViewController, type: .facebookMessenger) { [weak self] error in
-                guard let _ = self else {return}
-                guard error == nil else {
-                    completion(error)
-                    return
-                }
-                completion(nil)
-            }
-            break
         case .activityController:
             self.showMoreOptions()
-            completion(nil)
+            shareErrorCompletion(nil)
             
         }
     }
@@ -195,22 +158,6 @@ extension ShareHandler{
         completion(nil)
     }
     
-    fileprivate func saveVideoToCameraRoll(completion: @escaping ShareErrorCompletion){
-        guard let shareObject = self.shareObject else {
-            completion(ShareError.cantConvertData)
-            return
-        }
-        CameraRollHandler().saveVideoToCameraRoll(shareObject.watermarkedVideoToShare) { [weak self] identifier, error in
-            guard let _ = self else {return}
-            guard error == nil else {
-                completion(ShareError.accessToLibraryFailed)
-                return
-            }
-            self?.subActionsDelegate?.saveToCamera()
-            completion(nil)
-        }
-    }
-    
     fileprivate func showMoreOptions(){
         self.showActivityController()
     }
@@ -218,9 +165,89 @@ extension ShareHandler{
     fileprivate func showActivityController(){
         guard let shareObject = self.shareObject else {return}
         DispatchQueue.main.async {
-            let activityController = UIActivityViewController(activityItems: [shareObject.postUrlToShare], applicationActivities: nil)
+            let activityController = UIActivityViewController(activityItems: [shareObject.postTitle,shareObject.postUrlToShare], applicationActivities: nil)
             activityController.excludedActivityTypes = SocialSDK.activityExcludedTypes
             shareObject.rootViewController.present(activityController, animated: true, completion: nil)
         }
+    }
+}
+
+extension ShareHandler{
+    
+    func bindWatermarkURL(){
+        guard var shareObject = shareObject else {return}
+        shareObject.hasWatermark
+            .subscribe(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] hasWatermark in
+                guard let `self` = self else {return}
+                self.appSectionDataSource.send(self.setAppSectionDataSources())
+                self.normalSubSectionDataSource.send(self.setNormalSubActions())
+                self.ownerSubSectionDataSource.send(self.setOwnerSubActions())
+            })
+            .store(in: &shareObject.cancellableSet)
+    }
+    
+    func setAppSectionDataSources() -> [ShareTargets]{
+        var appList : [ShareTargets] = [.instagramPost,.instagramStory,.tiktok,.imessage,.whatsapp,.twitterPost,.facebook,.facebookMessenger,.snapchat,.telegram,.sendMail,.copyLink,.activityController]
+        appList.forEach { target in
+            if target.appSchemes != nil{
+                if !Utility.isAppInstalledOnDevice(app: target.appSchemes){
+                    let index = appList.firstIndex(of: target)
+                    if index != nil{
+                        appList.remove(at: index!)
+                    }
+                }
+            }
+        }
+        if shareObject?.watermarkURL == nil{
+            appList.forEach { target in
+                switch target{
+                case .instagramPost,.instagramStory,.tiktok,.snapchat:
+                    let index = appList.firstIndex(of: target)
+                    if index != nil{
+                        appList.remove(at: index!)
+                    }
+                default:
+                    break
+                }
+            }
+        }
+        return appList
+    }
+    
+    func setNormalSubActions() -> [ShareTargets]{
+        var list : [ShareTargets] = [.report,.bookmarkVideo,.cameraRoll]
+        if shareObject?.watermarkURL == nil{
+            list.forEach { target in
+                switch target{
+                case .cameraRoll:
+                    let index = list.firstIndex(of: target)
+                    if index != nil{
+                        list.remove(at: index!)
+                    }
+                default:
+                    break
+                }
+            }
+        }
+        return list
+    }
+    
+    func setOwnerSubActions() -> [ShareTargets]{
+        var list : [ShareTargets] = [.report,.bookmarkVideo,.cameraRoll,.editCaption,.deleteVideo]
+        if shareObject?.watermarkURL == nil{
+            list.forEach { target in
+                switch target{
+                case .cameraRoll,.deleteVideo:
+                    let index = list.firstIndex(of: target)
+                    if index != nil{
+                        list.remove(at: index!)
+                    }
+                default:
+                    break
+                }
+            }
+        }
+        return list
     }
 }

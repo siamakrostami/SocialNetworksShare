@@ -11,32 +11,23 @@ import FacebookShare
 import FacebookCore
 
 protocol FacebookProtocols{
-    func shareVideoToFacebook(url : URL , controller : UIViewController? ,type : ShareTargets , completion:@escaping ShareErrorCompletion)
+    func shareURLToFacebook(shareObject : ShareObject ,type : ShareTargets , completion:@escaping ShareErrorCompletion)
 }
 
 
 class Facebook : FacebookProtocols{
     
-    private var videoData : Data!
-    var videoContent = ShareVideoContent()
-    var videoObject : ShareVideo!
+    var linkContent = ShareLinkContent()
     var shareDialog : ShareDialog!
     init(){}
     
-    func shareVideoToFacebook(url: URL, controller : UIViewController? ,type: ShareTargets, completion: @escaping ShareErrorCompletion) {
+    func shareURLToFacebook(shareObject : ShareObject ,type : ShareTargets , completion:@escaping ShareErrorCompletion) {
         
         switch type{
         case .facebook:
-            do{
-                self.videoData = try Data(contentsOf: url)
-            }catch{
-                debugPrint(error)
-            }
-             videoObject = ShareVideo(data: self.videoData)
-             videoContent = ShareVideoContent()
-             videoContent.video = videoObject
-             shareDialog = ShareDialog(viewController: controller, content: videoContent, delegate: controller as? SharingDelegate)
-            shareDialog.show()
+            linkContent = ShareLinkContent()
+            linkContent.contentURL = shareObject.postUrlToShare
+            shareDialog = ShareDialog(viewController: shareObject.rootViewController, content: linkContent, delegate: shareObject.rootViewController as? SharingDelegate)
             if shareDialog.canShow{
                 shareDialog.show()
                 completion(nil)
@@ -44,10 +35,10 @@ class Facebook : FacebookProtocols{
                 completion(ShareError.cantOpenUrl)
             }
         case .facebookMessenger:
-            
-            let content = ShareLinkContent()
-            content.contentURL = url
-            let dialog = MessageDialog(content: content, delegate: controller as? SharingDelegate)
+
+            linkContent = ShareLinkContent()
+            linkContent.contentURL = shareObject.postUrlToShare
+            let dialog = MessageDialog(content: linkContent, delegate: shareObject.rootViewController as? SharingDelegate)
             do{
                 try dialog.validate()
             }catch{

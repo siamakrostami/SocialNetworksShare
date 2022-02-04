@@ -25,17 +25,12 @@ extension TikTok{
         debugPrint("tiktok selected")
         SocialSDK.request = TikTokOpenSDKShareRequest()
         SocialSDK.request.mediaType = .video
-        CameraRollHandler().saveVideoToCameraRoll(url) { [weak self] identifier, error in
+        CameraRollHandler().saveVideoToCameraRoll(url) {  identifier, error in
             guard let identifier = identifier else {return}
             SocialSDK.request.localIdentifiers = [identifier]
             debugPrint("tiktok locale identifier = \(identifier)")
             DispatchQueue.main.async {
                 SocialSDK.request.send(completionBlock: { response in
-                    debugPrint(response.shareState.rawValue)
-                    debugPrint(response.state)
-                    debugPrint(response.errCode)
-                    debugPrint(response.errString)
-                    debugPrint(response.isSucceed)
                     if response.isSucceed{
                         completion(nil)
                         return
