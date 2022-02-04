@@ -21,6 +21,15 @@ class Utility{
             watermarkProgress(exportProgress)
         } exportCompletion: { exportSession in
             exportCompletion(exportSession)
+            guard let export = exportSession else {return}
+            switch export.status{
+            case .completed:
+                Utility.createInstancesPerTarget(target: shareTarget, shareObject: shareObject, watermarkVideoUrl: cached) { shareError in
+                    shareErrorCompletion(shareError)
+                }
+            default:
+                break
+            }
         } cachedWatermark: { cached in
             cachedWatermark(cached)
             guard let cached = cached else {return}
