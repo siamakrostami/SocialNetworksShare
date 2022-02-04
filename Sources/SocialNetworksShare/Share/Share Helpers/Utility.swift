@@ -31,7 +31,7 @@ class Utility{
         } downloadError: { downloadingError in
             downloadError(downloadingError)
         }
-
+        
     }
     
     static func createInstancesPerTarget(target : ShareTargets,shareObject : ShareObject , watermarkVideoUrl : URL , shareErrorCompletion:@escaping ShareErrorCompletion){
@@ -46,6 +46,7 @@ class Utility{
                 shareErrorCompletion(nil)
             }
         case .tiktok:
+#if !targetEnvironment(simulator)
             TikTok().sendVideoToTikTok(url: watermarkVideoUrl) {  error in
                 guard error == nil else {
                     shareErrorCompletion(error)
@@ -53,6 +54,9 @@ class Utility{
                 }
                 shareErrorCompletion(nil)
             }
+#else
+            shareErrorCompletion(ShareError.appNotFound)
+#endif
         case .snapchat:
             Snapchat().shareVideoToSnapchat(url: watermarkVideoUrl, view: shareObject.rootViewController.view) {  error in
                 guard error == nil else {
@@ -116,6 +120,6 @@ class Utility{
         return false
 #endif
     }
-
+    
 }
 
