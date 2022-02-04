@@ -22,9 +22,10 @@ class Utility{
         } exportCompletion: { exportSession in
             exportCompletion(exportSession)
             guard let export = exportSession else {return}
+            guard let videoOutput = export.outputURL else {return}
             switch export.status{
             case .completed:
-                Utility.createInstancesPerTarget(target: shareTarget, shareObject: shareObject, watermarkVideoUrl: cached) { shareError in
+                Utility.createInstancesPerTarget(target: shareTarget, shareObject: shareObject, watermarkVideoUrl: videoOutput) { shareError in
                     shareErrorCompletion(shareError)
                 }
             default:
