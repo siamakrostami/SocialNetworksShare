@@ -62,8 +62,7 @@ class Instagram : InstagramProtocols {
     }
     
     fileprivate func shareVideoToFeed(url : URL , completion:@escaping ShareErrorCompletion){
-        let outputPath = Utility.createVideoOutputPath(from: url, data: self.videoData)
-        CameraRollHandler().saveVideoToCameraRoll(outputPath) { identifier, error in
+        CameraRollHandler().saveVideoToCameraRoll(url) { identifier, error in
             guard error == nil else {
                 completion(ShareError.accessToLibraryFailed)
                 return
