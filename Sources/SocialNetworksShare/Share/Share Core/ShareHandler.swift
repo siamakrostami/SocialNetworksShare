@@ -182,9 +182,9 @@ extension ShareHandler{
         CameraRollHandler().saveVideoToCameraRoll(url) { identifier, error in
             if error != nil{
                 completion(ShareError.accessToLibraryFailed)
-                self.subActionsDelegate?.saveToCamera()
             }else{
                 completion(nil)
+                self.subActionsDelegate?.saveToCamera()
             }
         }
     }
