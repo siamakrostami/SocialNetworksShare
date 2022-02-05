@@ -47,6 +47,28 @@ extension ShareHandler : ShareHandlerProtocols{
     public func shareVideo(to target: ShareTargets,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion ,shareErrorCompletion: @escaping ShareErrorCompletion) {
         guard let share = shareObject else {return}
         switch target{
+        case .cameraRoll:
+            Utility.watermarkProcess(shareObject: share, shareTarget: target) { image in
+                imageDownloadProgress(image)
+            } videoDownloadProgress: { video in
+                videoDownloadProgress(video)
+            } watermarkProgress: { watermark in
+                watermarkProgress(watermark)
+            } exportCompletion: { export in
+                exportCompletion(export)
+                if export?.status == .completed{
+                    guard let url = export?.outputURL else {return}
+                    self.saveToCamera(url: url, completion: shareErrorCompletion)
+                }
+            } cachedWatermark: { cached in
+                cachedWatermark(cached)
+                guard let cached = cached else {return}
+                self.saveToCamera(url: cached, completion: shareErrorCompletion)
+            } downloadError: { downloaderror in
+                downloadError(downloaderror)
+            } shareErrorCompletion: { shareerror in
+                shareErrorCompletion(shareerror)
+            }
         case .instagramPost , .instagramStory , .snapchat:
             Utility.watermarkProcess(shareObject: share, shareTarget: target, imageDownloadProgress: imageDownloadProgress, videoDownloadProgress: videoDownloadProgress, watermarkProgress: watermarkProgress, exportCompletion: exportCompletion, cachedWatermark: cachedWatermark, downloadError: downloadError, shareErrorCompletion: shareErrorCompletion)
         case .whatsapp:
@@ -101,9 +123,6 @@ extension ShareHandler : ShareHandlerProtocols{
                 }
                 shareErrorCompletion(nil)
             }
-        case .cameraRoll:
-            Utility.watermarkProcess(shareObject: share, shareTarget: target, imageDownloadProgress: imageDownloadProgress, videoDownloadProgress: videoDownloadProgress, watermarkProgress: watermarkProgress, exportCompletion: exportCompletion, cachedWatermark: cachedWatermark, downloadError: downloadError, shareErrorCompletion: shareErrorCompletion)
-            self.subActionsDelegate?.saveToCamera()
             //TODO: - Create Logic
         case .copyLink:
             self.copyLink { [weak self] error in
@@ -157,6 +176,17 @@ extension ShareHandler{
         UIPasteboard.general.url = shareObject.postUrlToShare
         self.subActionsDelegate?.copyLink()
         completion(nil)
+    }
+    
+    fileprivate func saveToCamera(url : URL,completion:@escaping ShareErrorCompletion){
+        CameraRollHandler().saveVideoToCameraRoll(url) { identifier, error in
+            if error != nil{
+                completion(ShareError.accessToLibraryFailed)
+                self.subActionsDelegate?.saveToCamera()
+            }else{
+                completion(nil)
+            }
+        }
     }
     
     fileprivate func showMoreOptions(){

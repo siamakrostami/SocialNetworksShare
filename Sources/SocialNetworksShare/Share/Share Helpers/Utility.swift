@@ -10,10 +10,10 @@ import UIKit
 import Watermark
 
 class Utility{
-    
+    static let watermarkObject = WatermarkHelper()
     static func watermarkProcess(shareObject : ShareObject,shareTarget : ShareTargets,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion , shareErrorCompletion:@escaping ShareErrorCompletion){
         guard let watermark = shareObject.watermarkURL else {return}
-        WatermarkHelper().createWatermarkForVideoFrom(videoUrl: shareObject.videoURL, imageUrl: watermark) { downloadImage in
+        watermarkObject.createWatermarkForVideoFrom(videoUrl: shareObject.videoURL, imageUrl: watermark) { downloadImage in
             imageDownloadProgress(downloadImage)
         } videoDownloadProgress: { downloadVideo in
             videoDownloadProgress(downloadVideo)
@@ -74,14 +74,6 @@ class Utility{
                     return
                 }
                 shareErrorCompletion(nil)
-            }
-        case .cameraRoll:
-            CameraRollHandler().saveVideoToCameraRoll(watermarkVideoUrl) { identifier, error in
-                if error != nil{
-                    shareErrorCompletion(ShareError.accessToLibraryFailed)
-                }else{
-                    shareErrorCompletion(nil)
-                }
             }
         default:
             break
