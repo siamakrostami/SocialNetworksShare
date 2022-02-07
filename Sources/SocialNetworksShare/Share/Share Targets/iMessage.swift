@@ -21,7 +21,7 @@ extension iMessage : iMessageProtocols{
     
     func sendURLToiMessage(shareObject : ShareObject , completion: @escaping ShareErrorCompletion) {
         self.controller = MFMessageComposeViewController()
-        let shareText = "\(shareObject.postTitle)/n\(shareObject.postUrlToShare)"
+        let shareText = "\(shareObject.postTitle) \(shareObject.postUrlToShare)"
         self.controller?.body = shareText
         self.controller?.messageComposeDelegate = shareObject.rootViewController as? MFMessageComposeViewControllerDelegate
         if self.controller != nil{

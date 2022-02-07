@@ -71,7 +71,6 @@ class Instagram : InstagramProtocols {
             let basePath = self.instagramFeedScheme
             let completePath = basePath + identifier
             Utility.OpenUrlScheme(scheme: completePath)
-            completion(nil)
         }
     }
     
@@ -84,7 +83,6 @@ class Instagram : InstagramProtocols {
         let pasteboardOption = [UIPasteboard.OptionsKey.expirationDate : Date(timeInterval: 60, since: Date())]
         UIPasteboard.general.setItems(self.pasteboardItems, options: pasteboardOption)
         Utility.OpenUrlScheme(scheme: self.instagramStoryScheme)
-        completion(nil)
     }
     
     

@@ -27,26 +27,21 @@ class Facebook : FacebookProtocols{
         case .facebook:
             linkContent = ShareLinkContent()
             linkContent.contentURL = shareObject.postUrlToShare
+            linkContent.quote = shareObject.postTitle
             shareDialog = ShareDialog(viewController: shareObject.rootViewController, content: linkContent, delegate: shareObject.rootViewController as? SharingDelegate)
             if shareDialog.canShow{
                 shareDialog.show()
-                completion(nil)
             }else{
                 completion(ShareError.cantOpenUrl)
             }
         case .facebookMessenger:
-
+            
             linkContent = ShareLinkContent()
             linkContent.contentURL = shareObject.postUrlToShare
+            linkContent.quote = shareObject.postTitle
             let dialog = MessageDialog(content: linkContent, delegate: shareObject.rootViewController as? SharingDelegate)
-            do{
-                try dialog.validate()
-            }catch{
-                completion(ShareError.cantOpenUrl)
-            }
             if dialog.canShow{
                 dialog.show()
-                completion(nil)
             }else{
                 completion(ShareError.cantOpenUrl)
             }
