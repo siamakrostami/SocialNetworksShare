@@ -9,29 +9,37 @@ import Foundation
 import UIKit
 
 protocol InstagramProtocols{
-    func shareVideoToInstagram(url : URL , type : ShareTargets , completion:@escaping ShareErrorCompletion)
+    func shareVideoToInstagram(url : URL , type : ShareTargets , mediaType : ShareObjectType , completion:@escaping ShareErrorCompletion)
 }
 
 class Instagram : InstagramProtocols {
     
     private let backgroundVideo = "com.instagram.sharedSticker.backgroundVideo"
+    private let backgroundImage = "com.instagram.sharedSticker.backgroundImage"
     private var contentURL = "com.instagram.sharedSticker.contentURL"
     private let instagramStoryScheme = "instagram-stories://share"
     private let instagramFeedScheme = "instagram://library?LocalIdentifier="
     private var pasteboardItems = [[String:Any]]()
     private var videoData : Data!
+    private var imageData : Data?
     init(){}
     
-    func shareVideoToInstagram(url: URL, type: ShareTargets, completion: @escaping ShareErrorCompletion) {
-        do{
-            self.videoData = try Data(contentsOf: url)
-        }catch{
-            debugPrint(error)
+    func shareVideoToInstagram(url: URL, type: ShareTargets, mediaType : ShareObjectType ,completion: @escaping ShareErrorCompletion) {
+        switch mediaType{
+        case .video:
+            do{
+                self.videoData = try Data(contentsOf: url)
+            }catch{
+                debugPrint(error)
+            }
+        default:
+            self.imageData = UIImage(contentsOfFile: url.absoluteString)?.pngData()
         }
+
         switch type{
         case .instagramStory:
             if PlistHelper.applicationQuerySchemeContains(scheme: "instagram-stories"){
-                self.shareVideoToStory(url: url) { [weak self] error in
+                self.shareVideoToStory(url: url, type: mediaType) { [weak self] error in
                     guard let _ = self else {return}
                     guard error != nil else {
                         completion(error)
@@ -44,7 +52,7 @@ class Instagram : InstagramProtocols {
             completion(ShareError.schemeNotfound)
         case .instagramPost:
             if PlistHelper.applicationQuerySchemeContains(scheme: "instagram"){
-                self.shareVideoToFeed(url: url) { [weak self] error in
+                self.shareVideoToFeed(url: url, type: mediaType) { [weak self] error in
                     guard let _ = self else {return}
                     guard error != nil else {
                         completion(error)
@@ -61,7 +69,7 @@ class Instagram : InstagramProtocols {
         }
     }
     
-    fileprivate func shareVideoToFeed(url : URL , completion:@escaping ShareErrorCompletion){
+    fileprivate func shareVideoToFeed(url : URL , type : ShareObjectType ,completion:@escaping ShareErrorCompletion){
         CameraRollHandler().saveVideoToCameraRoll(url) { identifier, error in
             guard error == nil else {
                 completion(ShareError.accessToLibraryFailed)
@@ -74,15 +82,28 @@ class Instagram : InstagramProtocols {
         }
     }
     
-    fileprivate func shareVideoToStory(url : URL , completion:@escaping ShareErrorCompletion){
-        guard let videoData = videoData else {
-            completion(ShareError.cantConvertData)
-            return
+    fileprivate func shareVideoToStory(url : URL ,type : ShareObjectType,completion:@escaping ShareErrorCompletion){
+        switch type{
+        case .video:
+            guard let videoData = videoData else {
+                completion(ShareError.cantConvertData)
+                return
+            }
+            self.pasteboardItems = [[backgroundVideo:videoData]]
+            let pasteboardOption = [UIPasteboard.OptionsKey.expirationDate : Date(timeInterval: 60, since: Date())]
+            UIPasteboard.general.setItems(self.pasteboardItems, options: pasteboardOption)
+            Utility.OpenUrlScheme(scheme: self.instagramStoryScheme)
+        default:
+            guard let imageData = imageData else {
+                completion(ShareError.cantConvertData)
+                return
+            }
+            self.pasteboardItems = [[backgroundImage:imageData]]
+            let pasteboardOption = [UIPasteboard.OptionsKey.expirationDate : Date(timeInterval: 60, since: Date())]
+            UIPasteboard.general.setItems(self.pasteboardItems, options: pasteboardOption)
+            Utility.OpenUrlScheme(scheme: self.instagramStoryScheme)
         }
-        self.pasteboardItems = [[backgroundVideo:videoData]]
-        let pasteboardOption = [UIPasteboard.OptionsKey.expirationDate : Date(timeInterval: 60, since: Date())]
-        UIPasteboard.general.setItems(self.pasteboardItems, options: pasteboardOption)
-        Utility.OpenUrlScheme(scheme: self.instagramStoryScheme)
+
     }
     
     

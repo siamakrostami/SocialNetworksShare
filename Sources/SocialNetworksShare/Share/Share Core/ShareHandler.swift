@@ -13,7 +13,7 @@ import Watermark
 public typealias ShareErrorCompletion = ((ShareError?) -> Void)
 
 public protocol ShareHandlerProtocols{
-    func shareVideo(to target : ShareTargets ,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion ,shareErrorCompletion: @escaping ShareErrorCompletion)
+    func shareMedia(to target : ShareTargets ,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion ,shareErrorCompletion: @escaping ShareErrorCompletion , watermarkImageCompletion : @escaping WatermarkImagesCompletion)
 }
 
 public protocol ShareSubActionProtocols : AnyObject{
@@ -44,7 +44,7 @@ open class ShareHandler{
 
 extension ShareHandler : ShareHandlerProtocols{
     
-    public func shareVideo(to target: ShareTargets,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion ,shareErrorCompletion: @escaping ShareErrorCompletion) {
+    public func shareMedia(to target: ShareTargets,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion ,shareErrorCompletion: @escaping ShareErrorCompletion , watermarkImageCompletion : @escaping WatermarkImagesCompletion) {
         guard let share = shareObject else {return}
         switch target{
         case .cameraRoll:
@@ -68,9 +68,14 @@ extension ShareHandler : ShareHandlerProtocols{
                 downloadError(downloaderror)
             } shareErrorCompletion: { shareerror in
                 shareErrorCompletion(shareerror)
+            } watermarkImageCompletion: { url,image  in
+                watermarkImageCompletion(url,image)
+                guard let url = url else {return}
+                self.saveToCamera(url: url, completion: shareErrorCompletion)
+                
             }
         case .instagramPost , .instagramStory , .snapchat:
-            Utility.watermarkProcess(shareObject: share, shareTarget: target, imageDownloadProgress: imageDownloadProgress, videoDownloadProgress: videoDownloadProgress, watermarkProgress: watermarkProgress, exportCompletion: exportCompletion, cachedWatermark: cachedWatermark, downloadError: downloadError, shareErrorCompletion: shareErrorCompletion)
+            Utility.watermarkProcess(shareObject: share, shareTarget: target, imageDownloadProgress: imageDownloadProgress, videoDownloadProgress: videoDownloadProgress, watermarkProgress: watermarkProgress, exportCompletion: exportCompletion, cachedWatermark: cachedWatermark, downloadError: downloadError, shareErrorCompletion: shareErrorCompletion, watermarkImageCompletion: watermarkImageCompletion)
         case .whatsapp:
             Whatsapp().sendPostToWhatsapp(url: share.postUrlToShare) { [weak self] error in
                 guard let _ = self else {return}
@@ -110,7 +115,7 @@ extension ShareHandler : ShareHandlerProtocols{
             }
         case .tiktok:
 #if !targetEnvironment(simulator)
-            Utility.watermarkProcess(shareObject: share, shareTarget: target, imageDownloadProgress: imageDownloadProgress, videoDownloadProgress: videoDownloadProgress, watermarkProgress: watermarkProgress, exportCompletion: exportCompletion, cachedWatermark: cachedWatermark, downloadError: downloadError, shareErrorCompletion: shareErrorCompletion)
+            Utility.watermarkProcess(shareObject: share, shareTarget: target, imageDownloadProgress: imageDownloadProgress, videoDownloadProgress: videoDownloadProgress, watermarkProgress: watermarkProgress, exportCompletion: exportCompletion, cachedWatermark: cachedWatermark, downloadError: downloadError, shareErrorCompletion: shareErrorCompletion, watermarkImageCompletion: watermarkImageCompletion)
 #else
             shareErrorCompletion(ShareError.appNotFound)
 #endif
@@ -220,6 +225,7 @@ extension ShareHandler{
     
     func setAppSectionDataSources() -> [ShareTargets]{
         var appList : [ShareTargets] = [.instagramPost,.instagramStory,.tiktok,.imessage,.whatsapp,.twitterPost,.facebook,.facebookMessenger,.snapchat,.telegram,.sendMail,.copyLink,.activityController]
+        
         appList.forEach { target in
             if target.appSchemes != nil{
                 if !Utility.isAppInstalledOnDevice(app: target.appSchemes){

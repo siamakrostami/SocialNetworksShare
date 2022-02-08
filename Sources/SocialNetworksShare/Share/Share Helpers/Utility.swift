@@ -11,44 +11,60 @@ import Watermark
 
 class Utility{
     static let watermarkObject = WatermarkHelper()
-    static func watermarkProcess(shareObject : ShareObject,shareTarget : ShareTargets,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion , shareErrorCompletion:@escaping ShareErrorCompletion){
+    static func watermarkProcess(shareObject : ShareObject,shareTarget : ShareTargets,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion , shareErrorCompletion:@escaping ShareErrorCompletion , watermarkImageCompletion : @escaping WatermarkImagesCompletion){
         guard let watermark = shareObject.watermarkURL else {return}
-        watermarkObject.createWatermarkForVideoFrom(videoUrl: shareObject.videoURL, imageUrl: watermark) { downloadImage in
-            imageDownloadProgress(downloadImage)
-        } videoDownloadProgress: { downloadVideo in
-            videoDownloadProgress(downloadVideo)
-        } watermarkProgress: { exportProgress in
-            watermarkProgress(exportProgress)
-        } exportCompletion: { exportSession in
-            exportCompletion(exportSession)
-            guard let export = exportSession else {return}
-            guard let videoOutput = export.outputURL else {return}
-            switch export.status{
-            case .completed:
-                Utility.createInstancesPerTarget(target: shareTarget, shareObject: shareObject, watermarkVideoUrl: videoOutput) { shareError in
+        switch shareObject.type{
+        case .video:
+            watermarkObject.createWatermarkForVideoFrom(videoUrl: shareObject.mediaURL, imageUrl: watermark) { downloadImage in
+                imageDownloadProgress(downloadImage)
+            } videoDownloadProgress: { downloadVideo in
+                videoDownloadProgress(downloadVideo)
+            } watermarkProgress: { exportProgress in
+                watermarkProgress(exportProgress)
+            } exportCompletion: { exportSession in
+                exportCompletion(exportSession)
+                guard let export = exportSession else {return}
+                guard let videoOutput = export.outputURL else {return}
+                switch export.status{
+                case .completed:
+                    Utility.createInstancesPerTarget(target: shareTarget, shareObject: shareObject, watermarkMediaUrl: videoOutput) { shareError in
+                        shareErrorCompletion(shareError)
+                    }
+                default:
+                    break
+                }
+            } cachedWatermark: { cached in
+                cachedWatermark(cached)
+                guard let cached = cached else {return}
+                Utility.createInstancesPerTarget(target: shareTarget, shareObject: shareObject, watermarkMediaUrl: cached) { shareError in
                     shareErrorCompletion(shareError)
                 }
-            default:
-                break
+                
+            } downloadError: { downloadingError in
+                downloadError(downloadingError)
             }
-        } cachedWatermark: { cached in
-            cachedWatermark(cached)
-            guard let cached = cached else {return}
-            Utility.createInstancesPerTarget(target: shareTarget, shareObject: shareObject, watermarkVideoUrl: cached) { shareError in
-                shareErrorCompletion(shareError)
+        default:
+            watermarkObject.addWatermarkToImage(mainImage: shareObject.mediaURL, watermarkURL: watermark) { image in
+                imageDownloadProgress(image)
+            } watermarkDownloadProgress: { watermark in
+                videoDownloadProgress(watermark)
+            } downloadError: { error in
+                downloadError(error)
+            } cachedWatermark: { url,image  in
+                watermarkImageCompletion(url,image)
             }
+
             
-        } downloadError: { downloadingError in
-            downloadError(downloadingError)
         }
+
         
     }
     
-    static func createInstancesPerTarget(target : ShareTargets,shareObject : ShareObject , watermarkVideoUrl : URL , shareErrorCompletion:@escaping ShareErrorCompletion){
-        
+    static func createInstancesPerTarget(target : ShareTargets,shareObject : ShareObject , watermarkMediaUrl : URL , shareErrorCompletion:@escaping ShareErrorCompletion){
+        guard let type = shareObject.type else {return}
         switch target{
         case .instagramPost,.instagramStory:
-            Instagram().shareVideoToInstagram(url: watermarkVideoUrl, type: target) { error in
+            Instagram().shareVideoToInstagram(url: watermarkMediaUrl, type: target, mediaType: type) { error in
                 guard error == nil else {
                     shareErrorCompletion(error)
                     return
@@ -57,7 +73,7 @@ class Utility{
             }
         case .tiktok:
 #if !targetEnvironment(simulator)
-            TikTok().sendVideoToTikTok(url: watermarkVideoUrl) {  error in
+            TikTok().sendVideoToTikTok(url: watermarkMediaUrl, type: type) {  error in
                 guard error == nil else {
                     shareErrorCompletion(error)
                     return
@@ -68,17 +84,17 @@ class Utility{
             shareErrorCompletion(ShareError.appNotFound)
 #endif
         case .snapchat:
-            Snapchat().shareVideoToSnapchat(url: watermarkVideoUrl, view: shareObject.rootViewController.view) {  error in
+            Snapchat().shareVideoToSnapchat(url: watermarkMediaUrl, type: type, view: shareObject.rootViewController.view) {  error in
                 guard error == nil else {
                     shareErrorCompletion(error)
                     return
                 }
                 shareErrorCompletion(nil)
             }
+
         default:
             break
         }
-        
         
     }
     

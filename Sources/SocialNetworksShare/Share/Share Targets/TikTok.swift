@@ -13,7 +13,7 @@ import TikTokOpenSDK
 
 #if !targetEnvironment(simulator)
 protocol TikTokProtocols{
-    func sendVideoToTikTok(url : URL , completion:@escaping ShareErrorCompletion)
+    func sendVideoToTikTok(url : URL , type : ShareObjectType , completion:@escaping ShareErrorCompletion)
 }
 
 class TikTok : TikTokProtocols{
@@ -21,24 +21,29 @@ class TikTok : TikTokProtocols{
 }
 
 extension TikTok{
-    func sendVideoToTikTok(url: URL , completion:@escaping ShareErrorCompletion) {
-        debugPrint("tiktok selected")
+
+    func sendVideoToTikTok(url: URL , type : ShareObjectType ,completion:@escaping ShareErrorCompletion) {
         SocialSDK.request = TikTokOpenSDKShareRequest()
-        SocialSDK.request.mediaType = .video
+        switch type{
+        case .video:
+            SocialSDK.request.mediaType = .video
+        default:
+            SocialSDK.request.mediaType = .video
+        }
+        
         CameraRollHandler().saveVideoToCameraRoll(url) {  identifier, error in
             guard let identifier = identifier else {return}
             SocialSDK.request.localIdentifiers = [identifier]
-            debugPrint("tiktok locale identifier = \(identifier)")
-            DispatchQueue.main.async {
                 SocialSDK.request.send(completionBlock: { response in
-                    if response.isSucceed{
-                        completion(nil)
-                        return
+                    DispatchQueue.main.async {
+                        if response.isSucceed{
+                            completion(nil)
+                            return
+                        }
+                        completion(ShareError.cantOpenUrl)
+                        debugPrint(response)
                     }
-                    completion(ShareError.cantOpenUrl)
-                    debugPrint(response)
                 })
-            }
         }
     }
 }

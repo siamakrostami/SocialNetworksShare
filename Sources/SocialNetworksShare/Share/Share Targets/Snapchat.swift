@@ -11,7 +11,7 @@ import SCSDKCoreKit
 import SCSDKCreativeKit
 
 protocol SnapchatProtocols{
-    func shareVideoToSnapchat(url : URL ,view : UIView?,completion:@escaping ShareErrorCompletion)
+    func shareVideoToSnapchat(url : URL,type : ShareObjectType ,view : UIView?,completion:@escaping ShareErrorCompletion)
 }
 
 
@@ -20,17 +20,36 @@ class Snapchat : SnapchatProtocols{
     init(){
     }
     
-    func shareVideoToSnapchat(url: URL,view : UIView?,completion: @escaping ShareErrorCompletion) {
+    func shareVideoToSnapchat(url: URL,type : ShareObjectType,view : UIView?,completion: @escaping ShareErrorCompletion) {
         if PlistHelper.applicationQuerySchemeContains(scheme: snapchatScheme){
-            let video = SCSDKSnapVideo(videoUrl: url)
-            let videoContent = SCSDKVideoSnapContent(snapVideo: video)
-            SocialSDK.snapApi.startSending(videoContent) { error in
-                if error == nil{
-                    completion(nil)
-                    return
+            switch type{
+            case .video:
+                let video = SCSDKSnapVideo(videoUrl: url)
+                let videoContent = SCSDKVideoSnapContent(snapVideo: video)
+                SocialSDK.snapApi.startSending(videoContent) { error in
+                    DispatchQueue.main.async {
+                        if error == nil{
+                            completion(nil)
+                            return
+                        }
+                        completion(ShareError.cantOpenUrl)
+                    }
                 }
-                completion(ShareError.cantOpenUrl)
+            default:
+                let image = SCSDKSnapPhoto(imageUrl: url)
+                let imageContent = SCSDKPhotoSnapContent(snapPhoto: image)
+                SocialSDK.snapApi.startSending(imageContent) { error in
+                    DispatchQueue.main.async {
+                        if error == nil{
+                            completion(nil)
+                            return
+                        }
+                        completion(ShareError.cantOpenUrl)
+                    }
+                }
+                
             }
+
         }else{
             completion(ShareError.schemeNotfound)
         }
