@@ -11,7 +11,7 @@ import Watermark
 
 class Utility{
     static let watermarkObject = WatermarkHelper()
-    static func watermarkProcess(shareObject : ShareObject,shareTarget : ShareTargets,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion , shareErrorCompletion:@escaping ShareErrorCompletion , watermarkImageCompletion : @escaping WatermarkImagesCompletion){
+    static func watermarkProcess(shareObject : ShareObject,shareTarget : ShareTargets,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion , shareErrorCompletion:@escaping ShareErrorCompletion , watermarkImageCompletion : @escaping WatermarkExistCompletion){
         guard let watermark = shareObject.watermarkURL else {return}
         switch shareObject.type{
         case .video:
@@ -44,21 +44,18 @@ class Utility{
                 downloadError(downloadingError)
             }
         default:
-            watermarkObject.addWatermarkToImage(mainImage: shareObject.mediaURL, watermarkURL: watermark) { image in
-                imageDownloadProgress(image)
-            } watermarkDownloadProgress: { watermark in
-                videoDownloadProgress(watermark)
+            
+            watermarkObject.addWatermarkToImage(mainImage: shareObject.mediaURL) { imageDownload in
+                imageDownloadProgress(imageDownload)
             } downloadError: { error in
                 downloadError(error)
-            } cachedWatermark: { url,image  in
-                watermarkImageCompletion(url,image)
-                guard let url = url else {return}
+            } cachedWatermark: { cached in
+                watermarkImageCompletion(cached)
+                guard let url = cached else {return}
                 Utility.createInstancesPerTarget(target: shareTarget, shareObject: shareObject, watermarkMediaUrl: url) { shareError in
                     shareErrorCompletion(shareError)
-                }
             }
-
-            
+        }
         }
 
         

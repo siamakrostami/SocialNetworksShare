@@ -13,7 +13,7 @@ import Watermark
 public typealias ShareErrorCompletion = ((ShareError?) -> Void)
 
 public protocol ShareHandlerProtocols{
-    func shareMedia(to target : ShareTargets ,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion ,shareErrorCompletion: @escaping ShareErrorCompletion , watermarkImageCompletion : @escaping WatermarkImagesCompletion)
+    func shareMedia(to target : ShareTargets ,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion ,shareErrorCompletion: @escaping ShareErrorCompletion , watermarkImageCompletion : @escaping WatermarkExistCompletion)
 }
 
 public protocol ShareSubActionProtocols : AnyObject{
@@ -44,7 +44,7 @@ open class ShareHandler{
 
 extension ShareHandler : ShareHandlerProtocols{
     
-    public func shareMedia(to target: ShareTargets,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion ,shareErrorCompletion: @escaping ShareErrorCompletion , watermarkImageCompletion : @escaping WatermarkImagesCompletion) {
+    public func shareMedia(to target: ShareTargets,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion ,shareErrorCompletion: @escaping ShareErrorCompletion , watermarkImageCompletion : @escaping WatermarkExistCompletion) {
         guard let share = shareObject else {return}
         switch target{
         case .cameraRoll:
@@ -68,8 +68,8 @@ extension ShareHandler : ShareHandlerProtocols{
                 downloadError(downloaderror)
             } shareErrorCompletion: { shareerror in
                 shareErrorCompletion(shareerror)
-            } watermarkImageCompletion: { url,image  in
-                watermarkImageCompletion(url,image)
+            } watermarkImageCompletion: { url  in
+                watermarkImageCompletion(url)
                 guard let url = url else {return}
                 self.saveToCamera(url: url, completion: shareErrorCompletion)
                 

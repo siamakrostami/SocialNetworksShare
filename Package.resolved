@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/facebook/facebook-ios-sdk",
         "state": {
           "branch": null,
-          "revision": "0470d1319adb3eb1d29cb489b93574d799fcc0eb",
-          "version": "12.3.1"
+          "revision": "e14f349945ba3f9516e3292107f42be19fe9fbe5",
+          "version": "12.3.2"
         }
       },
       {
@@ -24,7 +24,7 @@
         "repositoryURL": "https://git.sishemi.com/ios-libs/Watermark.git",
         "state": {
           "branch": "master",
-          "revision": "fe95014511f02c28cad9b0df8de417e8f12dbf03",
+          "revision": "fd90466a9a0607921a0866042656b8b954f5c450",
           "version": null
         }
       }

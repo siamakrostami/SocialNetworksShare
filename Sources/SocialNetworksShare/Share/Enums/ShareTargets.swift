@@ -93,7 +93,7 @@ extension ShareTargets{
         case .telegram:
             return "Telegram"
         case .cameraRoll:
-            return "Save Video"
+            return "Save Media"
         case .activityController:
             return "More"
         }
