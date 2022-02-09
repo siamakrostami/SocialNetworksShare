@@ -12,9 +12,9 @@ import Watermark
 class Utility{
     static let watermarkObject = WatermarkHelper()
     static func watermarkProcess(shareObject : ShareObject,shareTarget : ShareTargets,imageDownloadProgress : @escaping DownloadProgressCompletion, videoDownloadProgress:@escaping DownloadProgressCompletion , watermarkProgress:@escaping WatermakrProgressCompletion , exportCompletion:@escaping ExportSessionCompletion , cachedWatermark:@escaping WatermarkExistCompletion , downloadError : @escaping DownloadErrorCompletion , shareErrorCompletion:@escaping ShareErrorCompletion , watermarkImageCompletion : @escaping WatermarkExistCompletion){
-        guard let watermark = shareObject.watermarkURL else {return}
         switch shareObject.type{
         case .video:
+            guard let watermark = shareObject.watermarkURL else {return}
             guard let mediaURL = shareObject.mediaURL else {return}
             watermarkObject.createWatermarkForVideoFrom(videoUrl: mediaURL, imageUrl: watermark) { downloadImage in
                 imageDownloadProgress(downloadImage)
