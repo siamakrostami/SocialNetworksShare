@@ -205,7 +205,7 @@ extension ShareHandler{
                 }
             }
         }
-
+        
     }
     
     fileprivate func showMoreOptions(){
@@ -250,55 +250,111 @@ extension ShareHandler{
                 }
             }
         }
-        if shareObject?.watermarkURL == nil || shareObject?.mediaURL == nil{
-            appList.forEach { target in
-                switch target{
-                case .instagramPost,.instagramStory,.tiktok,.snapchat:
-                    let index = appList.firstIndex(of: target)
-                    if index != nil{
-                        appList.remove(at: index!)
+        switch shareObject?.type{
+        case .video:
+            if shareObject?.watermarkURL == nil{
+                appList.forEach { target in
+                    switch target{
+                    case .instagramPost,.instagramStory,.tiktok,.snapchat:
+                        let index = appList.firstIndex(of: target)
+                        if index != nil{
+                            appList.remove(at: index!)
+                        }
+                    default:
+                        break
                     }
-                default:
-                    break
                 }
             }
+        default:
+            if shareObject?.mediaURL == nil{
+                appList.forEach { target in
+                    switch target{
+                    case .instagramPost,.instagramStory,.tiktok,.snapchat:
+                        let index = appList.firstIndex(of: target)
+                        if index != nil{
+                            appList.remove(at: index!)
+                        }
+                    default:
+                        break
+                    }
+                }
+            }
+            
         }
+        
         return appList
     }
     
     func setNormalSubActions() -> [ShareTargets]{
         var list : [ShareTargets] = [.report,.bookmarkVideo,.cameraRoll]
-        if shareObject?.watermarkURL == nil || shareObject?.mediaURL == nil{
-            list.forEach { target in
-                switch target{
-                case .cameraRoll:
-                    let index = list.firstIndex(of: target)
-                    if index != nil{
-                        list.remove(at: index!)
+        switch shareObject?.type{
+        case .video:
+            if shareObject?.watermarkURL == nil{
+                list.forEach { target in
+                    switch target{
+                    case .cameraRoll:
+                        let index = list.firstIndex(of: target)
+                        if index != nil{
+                            list.remove(at: index!)
+                        }
+                    default:
+                        break
                     }
-                default:
-                    break
                 }
             }
-        }
-        return list
-    }
-    
-    func setOwnerSubActions() -> [ShareTargets]{
-        var list : [ShareTargets] = [.report,.bookmarkVideo,.cameraRoll,.editCaption,.deleteVideo]
-        if shareObject?.watermarkURL == nil || shareObject?.mediaURL == nil{
-            list.forEach { target in
-                switch target{
-                case .cameraRoll,.deleteVideo:
-                    let index = list.firstIndex(of: target)
-                    if index != nil{
-                        list.remove(at: index!)
+            default:
+                if shareObject?.mediaURL == nil{
+                    list.forEach { target in
+                        switch target{
+                        case .cameraRoll:
+                            let index = list.firstIndex(of: target)
+                            if index != nil{
+                                list.remove(at: index!)
+                            }
+                        default:
+                            break
+                        }
                     }
-                default:
-                    break
+                    
                 }
             }
+            return list
         }
-        return list
+        
+        func setOwnerSubActions() -> [ShareTargets]{
+            var list : [ShareTargets] = [.report,.bookmarkVideo,.cameraRoll,.editCaption,.deleteVideo]
+            switch shareObject?.type{
+            case .video:
+                if shareObject?.watermarkURL == nil{
+                    list.forEach { target in
+                        switch target{
+                        case .cameraRoll:
+                            let index = list.firstIndex(of: target)
+                            if index != nil{
+                                list.remove(at: index!)
+                            }
+                        default:
+                            break
+                        }
+                    }
+                }
+            default:
+                if shareObject?.mediaURL == nil{
+                    list.forEach { target in
+                        switch target{
+                        case .cameraRoll:
+                            let index = list.firstIndex(of: target)
+                            if index != nil{
+                                list.remove(at: index!)
+                            }
+                        default:
+                            break
+                        }
+                    }
+                }
+                
+            }
+            
+            return list
+        }
     }
-}
