@@ -30,32 +30,34 @@ extension TikTok{
             CameraRollHandler().saveVideoToCameraRoll(url) {  identifier, error in
                 guard let identifier = identifier else {return}
                 SocialSDK.request.localIdentifiers = [identifier]
-                SocialSDK.request.send(completionBlock: { response in
-                    DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    SocialSDK.request.send(completionBlock: { response in
+                        print(response)
                         if response.isSucceed{
                             completion(nil)
                             return
                         }
                         completion(ShareError.cantOpenUrl)
-                        debugPrint(response)
-                    }
-                })
+                    })
+                }
             }
         default:
             SocialSDK.request.mediaType = .video
             CameraRollHandler().saveImageToCameraRoll(url) {  identifier, error in
                 guard let identifier = identifier else {return}
                 SocialSDK.request.localIdentifiers = [identifier]
-                SocialSDK.request.send(completionBlock: { response in
-                    DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    SocialSDK.request.send(completionBlock: { response in
+                        print(response)
                         if response.isSucceed{
                             completion(nil)
                             return
                         }
                         completion(ShareError.cantOpenUrl)
-                        debugPrint(response)
-                    }
-                })
+                        
+                    })
+                }
+                
             }
         }
         
