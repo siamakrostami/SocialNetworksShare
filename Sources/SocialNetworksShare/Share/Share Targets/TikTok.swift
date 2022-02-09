@@ -21,19 +21,15 @@ class TikTok : TikTokProtocols{
 }
 
 extension TikTok{
-
+    
     func sendVideoToTikTok(url: URL , type : ShareObjectType ,completion:@escaping ShareErrorCompletion) {
         SocialSDK.request = TikTokOpenSDKShareRequest()
         switch type{
         case .video:
             SocialSDK.request.mediaType = .video
-        default:
-            SocialSDK.request.mediaType = .video
-        }
-        
-        CameraRollHandler().saveVideoToCameraRoll(url) {  identifier, error in
-            guard let identifier = identifier else {return}
-            SocialSDK.request.localIdentifiers = [identifier]
+            CameraRollHandler().saveVideoToCameraRoll(url) {  identifier, error in
+                guard let identifier = identifier else {return}
+                SocialSDK.request.localIdentifiers = [identifier]
                 SocialSDK.request.send(completionBlock: { response in
                     DispatchQueue.main.async {
                         if response.isSucceed{
@@ -44,7 +40,26 @@ extension TikTok{
                         debugPrint(response)
                     }
                 })
+            }
+        default:
+            SocialSDK.request.mediaType = .video
+            CameraRollHandler().saveImageToCameraRoll(url) {  identifier, error in
+                guard let identifier = identifier else {return}
+                SocialSDK.request.localIdentifiers = [identifier]
+                SocialSDK.request.send(completionBlock: { response in
+                    DispatchQueue.main.async {
+                        if response.isSucceed{
+                            completion(nil)
+                            return
+                        }
+                        completion(ShareError.cantOpenUrl)
+                        debugPrint(response)
+                    }
+                })
+            }
         }
+        
+        
     }
 }
 

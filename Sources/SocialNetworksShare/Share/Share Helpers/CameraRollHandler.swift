@@ -34,6 +34,30 @@ class CameraRollHandler{
         }
     }
     
+    func saveImageToCameraRoll(_ imageURL: URL, _ completion:@escaping ((String?,Error?) -> Void)){
+        var assetPlaceholder: PHObjectPlaceholder?
+        
+        requestAuthorization { error in
+            guard error == nil else {
+                completion(nil,error)
+                return
+            }
+            
+            PHPhotoLibrary.shared().performChanges {
+                let assetRequest = PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: imageURL)
+                assetPlaceholder = assetRequest?.placeholderForCreatedAsset
+            } completionHandler: { success, error in
+                guard error == nil, success else {
+                    completion(nil,error)
+                  return
+                }
+                completion(assetPlaceholder?.localIdentifier,nil)
+            }
+   
+        }
+        
+    }
+    
     
     func requestAuthorization(completion: @escaping (ShareError?)->Void) {
         guard PlistHelper.infoDictionary["NSPhotoLibraryUsageDescription"] != nil else {

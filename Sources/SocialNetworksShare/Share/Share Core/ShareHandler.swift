@@ -184,14 +184,28 @@ extension ShareHandler{
     }
     
     fileprivate func saveToCamera(url : URL,completion:@escaping ShareErrorCompletion){
-        CameraRollHandler().saveVideoToCameraRoll(url) { identifier, error in
-            if error != nil{
-                completion(ShareError.accessToLibraryFailed)
-            }else{
-                completion(nil)
-                self.subActionsDelegate?.saveToCamera()
+        guard let type = self.shareObject?.type else {return}
+        switch type{
+        case .video:
+            CameraRollHandler().saveVideoToCameraRoll(url) { identifier, error in
+                if error != nil{
+                    completion(ShareError.accessToLibraryFailed)
+                }else{
+                    completion(nil)
+                    self.subActionsDelegate?.saveToCamera()
+                }
+            }
+        default:
+            CameraRollHandler().saveImageToCameraRoll(url) { identifier, error in
+                if error != nil{
+                    completion(ShareError.accessToLibraryFailed)
+                }else{
+                    completion(nil)
+                    self.subActionsDelegate?.saveToCamera()
+                }
             }
         }
+
     }
     
     fileprivate func showMoreOptions(){

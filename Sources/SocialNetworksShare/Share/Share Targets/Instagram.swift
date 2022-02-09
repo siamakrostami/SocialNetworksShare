@@ -33,7 +33,7 @@ class Instagram : InstagramProtocols {
                 debugPrint(error)
             }
         default:
-            self.imageData = UIImage(contentsOfFile: url.absoluteString)?.pngData()
+            self.imageData = try? Data(contentsOf: url)
         }
 
         switch type{
@@ -70,16 +70,31 @@ class Instagram : InstagramProtocols {
     }
     
     fileprivate func shareVideoToFeed(url : URL , type : ShareObjectType ,completion:@escaping ShareErrorCompletion){
-        CameraRollHandler().saveVideoToCameraRoll(url) { identifier, error in
-            guard error == nil else {
-                completion(ShareError.accessToLibraryFailed)
-                return
+        switch type{
+        case .video:
+            CameraRollHandler().saveVideoToCameraRoll(url) { identifier, error in
+                guard error == nil else {
+                    completion(ShareError.accessToLibraryFailed)
+                    return
+                }
+                guard let identifier = identifier else {return}
+                let basePath = self.instagramFeedScheme
+                let completePath = basePath + identifier
+                Utility.OpenUrlScheme(scheme: completePath)
             }
-            guard let identifier = identifier else {return}
-            let basePath = self.instagramFeedScheme
-            let completePath = basePath + identifier
-            Utility.OpenUrlScheme(scheme: completePath)
+        default:
+            CameraRollHandler().saveImageToCameraRoll(url) { identifier, error in
+                guard error == nil else {
+                    completion(ShareError.accessToLibraryFailed)
+                    return
+                }
+                guard let identifier = identifier else {return}
+                let basePath = self.instagramFeedScheme
+                let completePath = basePath + identifier
+                Utility.OpenUrlScheme(scheme: completePath)
+            }
         }
+
     }
     
     fileprivate func shareVideoToStory(url : URL ,type : ShareObjectType,completion:@escaping ShareErrorCompletion){
