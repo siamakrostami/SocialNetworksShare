@@ -19,6 +19,7 @@ class Facebook : FacebookProtocols{
     
     var linkContent = ShareLinkContent()
     var shareDialog : ShareDialog!
+    var messageDialoge : MessageDialog!
     init(){}
     
     func shareURLToFacebook(shareObject : ShareObject ,type : ShareTargets , completion:@escaping ShareErrorCompletion) {
@@ -39,9 +40,9 @@ class Facebook : FacebookProtocols{
             linkContent = ShareLinkContent()
             linkContent.contentURL = shareObject.postUrlToShare
             linkContent.quote = shareObject.postTitle
-            let dialog = MessageDialog(content: linkContent, delegate: shareObject.rootViewController as? SharingDelegate)
-            if dialog.canShow{
-                dialog.show()
+            messageDialoge = MessageDialog(content: linkContent, delegate: shareObject.rootViewController as? SharingDelegate)
+            if messageDialoge.canShow{
+                messageDialoge.show()
             }else{
                 completion(ShareError.cantOpenUrl)
             }
