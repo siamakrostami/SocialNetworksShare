@@ -24,7 +24,7 @@ public struct ShareObject{
     var cancellableSet : Set<AnyCancellable> = []
     public var rootViewController : UIViewController
     
-    public init (postUrlToShare : URL ,postTitle : String,type : ShareObjectType ,media : URL ,watermark : URL,rootViewController : UIViewController){
+    public init (postUrlToShare : URL ,postTitle : String,type : ShareObjectType ,media : URL? ,watermark : URL?,rootViewController : UIViewController){
         self.postUrlToShare = postUrlToShare
         self.postTitle = postTitle
         self.mediaURL = media
