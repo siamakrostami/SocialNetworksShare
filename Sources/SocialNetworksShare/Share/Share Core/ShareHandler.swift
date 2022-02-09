@@ -250,7 +250,7 @@ extension ShareHandler{
                 }
             }
         }
-        if shareObject?.watermarkURL == nil{
+        if shareObject?.watermarkURL == nil || shareObject?.mediaURL == nil{
             appList.forEach { target in
                 switch target{
                 case .instagramPost,.instagramStory,.tiktok,.snapchat:
@@ -268,7 +268,7 @@ extension ShareHandler{
     
     func setNormalSubActions() -> [ShareTargets]{
         var list : [ShareTargets] = [.report,.bookmarkVideo,.cameraRoll]
-        if shareObject?.watermarkURL == nil{
+        if shareObject?.watermarkURL == nil || shareObject?.mediaURL == nil{
             list.forEach { target in
                 switch target{
                 case .cameraRoll:
@@ -286,7 +286,7 @@ extension ShareHandler{
     
     func setOwnerSubActions() -> [ShareTargets]{
         var list : [ShareTargets] = [.report,.bookmarkVideo,.cameraRoll,.editCaption,.deleteVideo]
-        if shareObject?.watermarkURL == nil{
+        if shareObject?.watermarkURL == nil || shareObject?.mediaURL == nil{
             list.forEach { target in
                 switch target{
                 case .cameraRoll,.deleteVideo:

@@ -15,7 +15,8 @@ class Utility{
         guard let watermark = shareObject.watermarkURL else {return}
         switch shareObject.type{
         case .video:
-            watermarkObject.createWatermarkForVideoFrom(videoUrl: shareObject.mediaURL, imageUrl: watermark) { downloadImage in
+            guard let mediaURL = shareObject.mediaURL else {return}
+            watermarkObject.createWatermarkForVideoFrom(videoUrl: mediaURL, imageUrl: watermark) { downloadImage in
                 imageDownloadProgress(downloadImage)
             } videoDownloadProgress: { downloadVideo in
                 videoDownloadProgress(downloadVideo)
@@ -44,8 +45,8 @@ class Utility{
                 downloadError(downloadingError)
             }
         default:
-            
-            watermarkObject.addWatermarkToImage(mainImage: shareObject.mediaURL) { imageDownload in
+            guard let mediaURL = shareObject.mediaURL else {return}
+            watermarkObject.addWatermarkToImage(mainImage: mediaURL) { imageDownload in
                 imageDownloadProgress(imageDownload)
             } downloadError: { error in
                 downloadError(error)
