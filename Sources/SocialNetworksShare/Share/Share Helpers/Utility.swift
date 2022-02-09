@@ -52,6 +52,10 @@ class Utility{
                 downloadError(error)
             } cachedWatermark: { url,image  in
                 watermarkImageCompletion(url,image)
+                guard let url = url else {return}
+                Utility.createInstancesPerTarget(target: shareTarget, shareObject: shareObject, watermarkMediaUrl: url) { shareError in
+                    shareErrorCompletion(shareError)
+                }
             }
 
             
