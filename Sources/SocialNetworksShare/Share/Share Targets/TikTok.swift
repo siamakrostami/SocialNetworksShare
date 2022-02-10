@@ -33,6 +33,7 @@ extension TikTok{
                 DispatchQueue.main.async {
                     SocialSDK.request.send(completionBlock: { response in
                         print(response)
+                        debugPrint(response.shareState)
                         if response.isSucceed{
                             completion(nil)
                             return
@@ -49,6 +50,7 @@ extension TikTok{
                 DispatchQueue.main.async {
                     SocialSDK.request.send(completionBlock: { response in
                         print(response)
+                        debugPrint(response.shareState)
                         if response.isSucceed{
                             completion(nil)
                             return
