@@ -30,7 +30,7 @@ class Facebook : FacebookProtocols{
             linkContent.contentURL = shareObject.postUrlToShare
             linkContent.quote = shareObject.postTitle
             shareDialog = ShareDialog(viewController: shareObject.rootViewController, content: linkContent, delegate: shareObject.rootViewController as? SharingDelegate)
-            shareDialog.mode = .shareSheet
+            shareDialog.mode = .native
             if shareDialog.canShow{
                 shareDialog.show()
             }else{
