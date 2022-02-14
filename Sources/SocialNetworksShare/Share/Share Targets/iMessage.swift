@@ -25,7 +25,7 @@ extension iMessage : iMessageProtocols{
         self.controller?.body = shareText
         self.controller?.messageComposeDelegate = shareObject.rootViewController as? MFMessageComposeViewControllerDelegate
         if self.controller != nil{
-            shareObject.rootViewController.present(self.controller!, animated: true, completion: nil)
+            shareObject.rootViewController?.present(self.controller!, animated: true, completion: nil)
         }
     }
     

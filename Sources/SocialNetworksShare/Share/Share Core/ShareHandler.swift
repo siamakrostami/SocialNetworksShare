@@ -217,7 +217,7 @@ extension ShareHandler{
         DispatchQueue.main.async {
             let activityController = UIActivityViewController(activityItems: [shareObject.postTitle,shareObject.postUrlToShare], applicationActivities: nil)
             activityController.excludedActivityTypes = SocialSDK.activityExcludedTypes
-            shareObject.rootViewController.present(activityController, animated: true, completion: nil)
+            shareObject.rootViewController?.present(activityController, animated: true, completion: nil)
         }
     }
 }
