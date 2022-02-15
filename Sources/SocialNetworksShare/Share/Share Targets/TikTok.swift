@@ -22,7 +22,7 @@ class TikTok : TikTokProtocols{
 
 extension TikTok{
 
-    func sendVideoToTikTok(url: URL ,controller : UIViewController ,type : ShareObjectType ,completion:@escaping ShareErrorCompletion) {
+    func sendVideoToTikTok(url: URL ,type : ShareObjectType ,completion:@escaping ShareErrorCompletion) {
         SocialSDK.request = TikTokOpenSDKShareRequest()
         switch type{
         case .video:
