@@ -238,7 +238,7 @@ extension ShareHandler{
     }
     
     func setAppSectionDataSources() -> [ShareTargets]{
-        var appList : [ShareTargets] = [.instagramPost,.instagramStory,.tiktok,.imessage,.whatsapp,.twitterPost,.facebook,.facebookMessenger,.snapchat,.telegram,.sendMail,.copyLink,.activityController]
+        var appList : [ShareTargets] = [.instagramPost,.instagramStory,.tiktok,.imessage,.whatsapp,.twitterPost,.facebook,.snapchat,.telegram,.sendMail,.copyLink,.activityController]
         
         appList.forEach { target in
             if target.appSchemes != nil{
