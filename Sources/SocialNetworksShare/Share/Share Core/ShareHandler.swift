@@ -286,7 +286,12 @@ extension ShareHandler{
     }
     
     func setNormalSubActions() -> [ShareTargets]{
-        var list : [ShareTargets] = [.report,.bookmarkVideo,.cameraRoll]
+        var list : [ShareTargets]!
+        if shareObject!.shouldShowBookmark{
+            list = [.report,.bookmarkVideo,.cameraRoll]
+        }else{
+            list = [.report,.cameraRoll]
+        }
         switch shareObject?.type{
         case .video:
             if shareObject?.watermarkURL == nil{
@@ -322,7 +327,12 @@ extension ShareHandler{
         }
         
         func setOwnerSubActions() -> [ShareTargets]{
-            var list : [ShareTargets] = [.report,.bookmarkVideo,.cameraRoll,.editCaption,.deleteVideo]
+            var list : [ShareTargets]!
+            if shareObject!.shouldShowBookmark{
+                list = [.report,.bookmarkVideo,.cameraRoll,.editCaption,.deleteVideo]
+            }else{
+                list = [.report,.cameraRoll,.editCaption,.deleteVideo]
+            }
             switch shareObject?.type{
             case .video:
                 if shareObject?.watermarkURL == nil{

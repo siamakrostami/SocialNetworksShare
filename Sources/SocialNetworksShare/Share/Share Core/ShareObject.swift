@@ -23,13 +23,15 @@ public struct ShareObject{
     var hasWatermark = CurrentValueSubject<Bool,Never>(false)
     var cancellableSet : Set<AnyCancellable> = []
     public var rootViewController : UIViewController?
+    public var shouldShowBookmark : Bool
     
-    public init (postUrlToShare : URL ,postTitle : String,type : ShareObjectType ,media : URL? ,watermark : URL?,rootViewController : UIViewController?){
+    public init (postUrlToShare : URL ,postTitle : String,type : ShareObjectType ,media : URL? ,watermark : URL?,rootViewController : UIViewController? , shouldBookmark : Bool){
         self.postUrlToShare = postUrlToShare
         self.postTitle = postTitle
         self.mediaURL = media
         self.watermarkURL = watermark
         self.type = type
+        self.shouldShowBookmark = shouldBookmark
         self.rootViewController = rootViewController
         self.checkWatermark()
     }
