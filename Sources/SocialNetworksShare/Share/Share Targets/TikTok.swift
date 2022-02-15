@@ -21,8 +21,8 @@ class TikTok : TikTokProtocols{
 }
 
 extension TikTok{
-    
-    func sendVideoToTikTok(url: URL , type : ShareObjectType ,completion:@escaping ShareErrorCompletion) {
+
+    func sendVideoToTikTok(url: URL ,controller : UIViewController ,type : ShareObjectType ,completion:@escaping ShareErrorCompletion) {
         SocialSDK.request = TikTokOpenSDKShareRequest()
         switch type{
         case .video:
@@ -30,6 +30,8 @@ extension TikTok{
             CameraRollHandler().saveVideoToCameraRoll(url) {  identifier, error in
                 guard let identifier = identifier else {return}
                 SocialSDK.request.localIdentifiers = [identifier]
+                SocialSDK.request.landedPageType = .edit
+                SocialSDK.request.state = UUID().uuidString
                 DispatchQueue.main.async {
                     SocialSDK.request.send(completionBlock: { response in
                         print(response)
@@ -47,6 +49,8 @@ extension TikTok{
             CameraRollHandler().saveImageToCameraRoll(url) {  identifier, error in
                 guard let identifier = identifier else {return}
                 SocialSDK.request.localIdentifiers = [identifier]
+                SocialSDK.request.landedPageType = .edit
+                SocialSDK.request.state = UUID().uuidString
                 DispatchQueue.main.async {
                     SocialSDK.request.send(completionBlock: { response in
                         print(response)
@@ -56,7 +60,7 @@ extension TikTok{
                             return
                         }
                         completion(ShareError.cantOpenUrl)
-                        
+
                     })
                 }
                 
