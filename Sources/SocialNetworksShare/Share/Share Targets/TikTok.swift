@@ -30,7 +30,7 @@ extension TikTok{
             CameraRollHandler().saveVideoToCameraRoll(url) {  identifier, error in
                 guard let identifier = identifier else {return}
                 SocialSDK.request.localIdentifiers = [identifier]
-                SocialSDK.request.landedPageType = .edit
+                SocialSDK.request.landedPageType = .clip
                 SocialSDK.request.state = UUID().uuidString
                 DispatchQueue.main.async {
                     SocialSDK.request.send(completionBlock: { response in
@@ -49,7 +49,7 @@ extension TikTok{
             CameraRollHandler().saveImageToCameraRoll(url) {  identifier, error in
                 guard let identifier = identifier else {return}
                 SocialSDK.request.localIdentifiers = [identifier]
-                SocialSDK.request.landedPageType = .edit
+                SocialSDK.request.landedPageType = .clip
                 SocialSDK.request.state = UUID().uuidString
                 DispatchQueue.main.async {
                     SocialSDK.request.send(completionBlock: { response in
